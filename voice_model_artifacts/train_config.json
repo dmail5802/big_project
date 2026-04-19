@@ -1,0 +1,21 @@
+{
+  "project_root": ".",
+  "manifest_path": "voice_data/manifest.jsonl",
+  "output_dir": "voice_model_artifacts",
+  "output_wav_dir": "synthesized_audio",
+  "base_model_name": "tts_models/en/ljspeech/glow-tts",
+  "vocoder_name": "vocoder_models/en/ljspeech/hifigan_v2",
+  "speaker_encoder_name": "speechbrain/spkrec-ecapa-voxceleb",
+  "sample_rate": 16000,
+  "max_audio_seconds": 8.0,
+  "max_text_length": 256,
+  "batch_size": 1,
+  "grad_accum_steps": 4,
+  "learning_rate": 0.0001,
+  "num_epochs": 3,
+  "seed": 42,
+  "cpu_threads": 4,
+  "use_speaker_embedding": true,
+  "num_mels": 80,
+  "num_freq": 1025
+}

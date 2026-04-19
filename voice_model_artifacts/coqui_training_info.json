@@ -1,0 +1,7 @@
+{
+  "status": "prepared_for_trainer",
+  "samples": 1,
+  "metadata_file": "/mnt/d/my_repos/college/business_programming/big_project/voice_model_artifacts/coqui_finetune_metadata.csv",
+  "trainer_output_dir": "/mnt/d/my_repos/college/business_programming/big_project/voice_model_artifacts/coqui_finetuned",
+  "note": "Use Coqui Trainer with a model-specific config for GlowTTS/VITS/XTTS fine-tuning. This notebook prepared metadata, but training should be launched via trainer CLI/script."
+}

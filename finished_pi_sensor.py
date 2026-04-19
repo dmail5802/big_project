@@ -216,31 +216,27 @@ class RaspberryPiSensor:
         self._ensure_connected()
 
         mode = "blocking" if blocking else "background"
-        command = (
-            "python3 -c \""
-            "import json,os,shutil,subprocess;"
-            f"audio_path={audio_file_path!r};"
-            f"mode={mode!r};"
-            "exists=os.path.isfile(audio_path);"
-            "players=['aplay','mpg123','omxplayer'];"
-            "player=next((p for p in players if shutil.which(p)),None);"
-            "result={'audio_path':audio_path,'exists':exists,'player':player,'mode':mode};"
-            "if (not exists) or (player is None):"
-            " print(json.dumps(result));"
-            " raise SystemExit(0);"
-            "cmd=[player,audio_path];"
-            "if mode=='background':"
-            " subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL);"
-            " result['started']=True;"
-            " result['returncode']=None;"
-            "else:"
-            " proc=subprocess.run(cmd, capture_output=True, text=True);"
-            " result['started']=(proc.returncode==0);"
-            " result['returncode']=proc.returncode;"
-            " result['stderr']=proc.stderr.strip();"
-            "print(json.dumps(result))"
-            "\""
-        )
+        command = f'''python3 -c "import json, os, shutil, subprocess
+audio_path = {audio_file_path!r}
+mode = {mode!r}
+exists = os.path.isfile(audio_path)
+players = ['aplay', 'mpg123', 'omxplayer']
+player = next((p for p in players if shutil.which(p)), None)
+result = {{'audio_path': audio_path, 'exists': exists, 'player': player, 'mode': mode}}
+if (not exists) or (player is None):
+    print(json.dumps(result))
+    raise SystemExit(0)
+cmd = [player, audio_path]
+if mode == 'background':
+    subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    result['started'] = True
+    result['returncode'] = None
+else:
+    proc = subprocess.run(cmd, capture_output=True, text=True)
+    result['started'] = (proc.returncode == 0)
+    result['returncode'] = proc.returncode
+    result['stderr'] = proc.stderr.strip()
+print(json.dumps(result))"'''
 
         result = _run_remote_json_command(client=self._client, command=command)
         if not result.get("exists", False):
@@ -257,6 +253,51 @@ class RaspberryPiSensor:
             )
         return result
 
+    def play_local_audio_file(
+        self,
+        local_audio_file_path: str | Path,
+        blocking: bool = True,
+        remote_directory: str = "/tmp",
+    ) -> dict[str, Any]:
+        """Upload a local audio file to the Pi and play it through the Pi's speakers.
+
+        Args:
+            local_audio_file_path: Path to the audio file on the PC running this code.
+            blocking: Whether to wait for playback to finish (default: True).
+            remote_directory: Directory on the Pi to store the uploaded file temporarily.
+
+        Returns:
+            Dictionary with upload and playback details.
+
+        Raises:
+            FileNotFoundError: If the local audio file does not exist.
+            RuntimeError: If upload or playback fails.
+        """
+        self._ensure_connected()
+
+        local_path = Path(local_audio_file_path)
+        if not local_path.exists():
+            raise FileNotFoundError(f"Local audio file not found: {local_path}")
+
+        remote_path = f"{remote_directory.rstrip('/')}/{local_path.name}"
+
+        assert self._client is not None
+        with self._client.open_sftp() as sftp:
+            sftp.put(str(local_path), remote_path)
+
+        playback_result = self.play_audio_file(remote_path, blocking=blocking)
+        playback_result["uploaded_from"] = str(local_path)
+        playback_result["remote_audio_path"] = remote_path
+        return playback_result
+    
+    def play_audio_file2(self, audio_file_path: str) -> None:
+        self._ensure_connected()
+        command = f"aplay {audio_file_path}"
+        _, error, status = _run_remote_command(self._client, command)
+
+        if status != 0:
+            raise RuntimeError(f"Playback failed: {error}")
+        
     def stream_light_readings(
         self,
         sample_count: int = 10,

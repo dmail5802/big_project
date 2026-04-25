@@ -298,27 +298,27 @@ print(json.dumps(result))"'''
         if status != 0:
             raise RuntimeError(f"Playback failed: {error}")
         
-    def stream_light_readings(
-        self,
-        sample_count: int = 10,
-        interval_seconds: float = 1.0,
-        light_sensor_port: int = 0,
-    ) -> list[dict[str, Any]]:
-        """Collect multiple light readings from the Pi at a fixed interval.
+    # def stream_light_readings(
+    #     self,
+    #     sample_count: int = 10,
+    #     interval_seconds: float = 1.0,
+    #     light_sensor_port: int = 0,
+    # ) -> list[dict[str, Any]]:
+    #     """Collect multiple light readings from the Pi at a fixed interval.
 
-        Args:
-            sample_count: Number of samples to collect (default: 10).
-            interval_seconds: Seconds between samples (default: 1.0).
-            light_sensor_port: GPIO port of the light sensor (default: 0).
+    #     Args:
+    #         sample_count: Number of samples to collect (default: 10).
+    #         interval_seconds: Seconds between samples (default: 1.0).
+    #         light_sensor_port: GPIO port of the light sensor (default: 0).
 
-        Returns:
-            List of light reading dictionaries.
-        """
-        readings: list[dict[str, Any]] = []
-        for _ in range(sample_count):
-            readings.append(self.get_light_reading(light_sensor_port=light_sensor_port))
-            time.sleep(interval_seconds)
-        return readings
+    #     Returns:
+    #         List of light reading dictionaries.
+    #     """
+    #     readings: list[dict[str, Any]] = []
+    #     for _ in range(sample_count):
+    #         readings.append(self.get_light_reading(light_sensor_port=light_sensor_port))
+    #         time.sleep(interval_seconds)
+    #     return readings
 
 
 __all__ = [
